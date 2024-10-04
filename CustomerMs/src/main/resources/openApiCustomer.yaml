@@ -1,0 +1,200 @@
+openapi: 3.0.1
+info:
+  title: MicroServicio Banco XYZ
+  description: API para gestionar clientes del banco
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Servidor Local para CustomerMs
+
+paths:
+  /clientes:
+    get:
+      summary: Listar todos los clientes
+      operationId: listAllCustomers
+      tags:
+        - Clientes
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Crear un nuevo cliente
+      operationId: createCustomer
+      tags:
+        - Clientes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteRequest'
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /clientes/{id}:
+    get:
+      summary: Obtener detalles de un cliente por su ID
+      operationId: getCustomerById
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Actualizar un cliente por su ID
+      operationId: updateCustomerById
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteRequest'
+      responses:
+        '200':
+          description: Cliente actualizado
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar un cliente por su ID
+      operationId: deleteCustomerById
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Cliente eliminado
+        '400':
+          description: No se puede eliminar el cliente porque tiene cuentas activas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ClienteRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        apellido:
+          type: string
+        dni:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - nombre
+        - apellido
+        - dni
+    ClienteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        apellido:
+          type: string
+        dni:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - nombre
+        - apellido
+        - dni
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+        - code
+        - message
