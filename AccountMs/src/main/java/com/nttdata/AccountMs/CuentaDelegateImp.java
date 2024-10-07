@@ -4,6 +4,8 @@ import com.nttdata.AccountMs.api.CuentasApiDelegate;
 import com.nttdata.AccountMs.business.CuentaService;
 import com.nttdata.AccountMs.model.CuentaRequest;
 import com.nttdata.AccountMs.model.CuentaResponse;
+import com.nttdata.AccountMs.model.InlineObject;
+import com.nttdata.AccountMs.model.SaldoTipoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,14 +44,14 @@ public class CuentaDelegateImp implements CuentasApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> depositToAccount(Integer cuentaId, CuentaRequest cuentaRequest) {
-        cuentaService.depositToAccount(cuentaId, cuentaRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> updateAccountBalance(String numeroCuenta, InlineObject inlineObject) {
+        cuentaService.updateAccountBalance(numeroCuenta, inlineObject);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Void> withdrawFromAccount(Integer cuentaId, CuentaRequest cuentaRequest) {
-        cuentaService.withdrawFromAccount(cuentaId, cuentaRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SaldoTipoResponse> getAccountBalanceAndType(String numeroCuenta) {
+        SaldoTipoResponse saldoTipoResponse = cuentaService.getAccountBalanceAndType(numeroCuenta);
+        return ResponseEntity.ok(saldoTipoResponse);
     }
 }

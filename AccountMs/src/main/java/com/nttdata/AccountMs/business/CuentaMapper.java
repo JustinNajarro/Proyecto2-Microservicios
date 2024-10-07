@@ -3,6 +3,7 @@ package com.nttdata.AccountMs.business;
 
 import com.nttdata.AccountMs.model.CuentaRequest;
 import com.nttdata.AccountMs.model.CuentaResponse;
+import com.nttdata.AccountMs.model.SaldoTipoResponse;
 import com.nttdata.AccountMs.model.entity.Cuenta;
 import com.nttdata.AccountMs.model.entity.TipoCuentaEnum;
 import org.springframework.stereotype.Component;
@@ -34,5 +35,17 @@ public class CuentaMapper {
 
     public CuentaResponse.TipoCuentaEnum mapToResponseTipoCuenta(TipoCuentaEnum tipoCuentaEntity) {
         return CuentaResponse.TipoCuentaEnum.valueOf(tipoCuentaEntity.name());
+    }
+
+    public SaldoTipoResponse getSaldoOfCuenta(Cuenta entity){
+        SaldoTipoResponse saldoTipoResponse = new SaldoTipoResponse();
+        saldoTipoResponse.setSaldo(entity.getSaldo());
+        saldoTipoResponse.tipoCuenta(mapToResponseSaldo(entity.getTipoCuenta()));
+
+        return saldoTipoResponse;
+    }
+
+    public SaldoTipoResponse.TipoCuentaEnum mapToResponseSaldo(TipoCuentaEnum tipoCuentaEntity) {
+        return SaldoTipoResponse.TipoCuentaEnum.valueOf(tipoCuentaEntity.name());
     }
 }

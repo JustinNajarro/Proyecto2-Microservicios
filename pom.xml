@@ -35,6 +35,8 @@
 		<module>CustomerMs</module>
 		<module>AccountMs</module>
 		<module>api-gateway</module>
+		<module>discovery-server</module>
+		<module>TransaccionMs</module>
 	</modules>
 	<dependencies>
 

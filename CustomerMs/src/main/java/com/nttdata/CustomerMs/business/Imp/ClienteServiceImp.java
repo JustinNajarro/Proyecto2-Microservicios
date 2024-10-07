@@ -61,6 +61,11 @@ public class ClienteServiceImp implements ClienteService {
     }
 
     @Override
+    public Boolean checkIfCustomerExists(Integer clienteId) {
+        return clienteRepository.existsById(clienteId);
+    }
+
+    @Override
     public void updateCustomerById(Integer id, ClienteRequest clienteRequest) {
         clienteRepository.findById(id)
                 .map(cliente -> {

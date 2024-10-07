@@ -44,4 +44,9 @@ public class ClienteDelegateImp implements ClientesApiDelegate {
         clienteService.updateCustomerById(id, clienteRequest);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<Boolean> checkIfCustomerExists(Integer clienteId) {
+        return ResponseEntity.ok(clienteService.checkIfCustomerExists(clienteId));
+    }
 }

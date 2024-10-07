@@ -11,4 +11,5 @@ public interface ClienteService {
     ClienteResponse getCustomerById(Integer id);
     void updateCustomerById(Integer id, ClienteRequest clienteRequest);
     void deleteCustomerById(Integer id);
+    Boolean checkIfCustomerExists(Integer id);
 }

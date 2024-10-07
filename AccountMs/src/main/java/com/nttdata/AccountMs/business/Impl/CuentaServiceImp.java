@@ -3,9 +3,12 @@ package com.nttdata.AccountMs.business.Impl;
 import com.nttdata.AccountMs.business.CuentaMapper;
 import com.nttdata.AccountMs.business.CuentaService;
 
+import com.nttdata.AccountMs.clients.CustomerFeignClient;
 import com.nttdata.AccountMs.exception.CustomExceptions;
 import com.nttdata.AccountMs.model.CuentaRequest;
 import com.nttdata.AccountMs.model.CuentaResponse;
+import com.nttdata.AccountMs.model.InlineObject;
+import com.nttdata.AccountMs.model.SaldoTipoResponse;
 import com.nttdata.AccountMs.model.entity.Cuenta;
 import com.nttdata.AccountMs.model.entity.TipoCuentaEnum;
 import com.nttdata.AccountMs.repository.CuentaRepository;
@@ -26,6 +29,9 @@ public class CuentaServiceImp implements CuentaService {
     @Autowired
     CuentaMapper cuentaMapper;
 
+    @Autowired
+    CustomerFeignClient customerFeignClient;
+
     @Override
     public List<CuentaResponse> listAllAccounts() {
         return Optional.of(cuentaRepository.findAll().stream()
@@ -37,6 +43,12 @@ public class CuentaServiceImp implements CuentaService {
 
     @Override
     public CuentaResponse createAccount(CuentaRequest cuentaRequest) {
+
+        Boolean customerExists = customerFeignClient.checkIfCustomerExists(cuentaRequest.getClienteId());
+
+        if (!Boolean.TRUE.equals(customerExists)) {
+            throw new CustomExceptions.BadRequestException("El cliente no existe.");
+        }
 
         if (cuentaRequest.getSaldo() <= 0) {
             throw new CustomExceptions.BadRequestException("El saldo inicial debe ser mayor a 0.");
@@ -69,41 +81,26 @@ public class CuentaServiceImp implements CuentaService {
     }
 
     @Override
-    public void depositToAccount(Integer cuentaId, CuentaRequest cuentaRequest) {
-        Optional.of(cuentaRequest)
-                .filter(req -> req.getSaldo() > 0)
-                .orElseThrow(() -> new CustomExceptions.BadRequestException("El monto a depositar debe ser mayor a 0."));
+    public void updateAccountBalance(String numeroCuenta, InlineObject inlineObject) {
+        Optional.ofNullable(cuentaRepository.findByNumeroCuenta(numeroCuenta))
+                .map(cuentaOpt -> {
+                    if (cuentaOpt.isEmpty()) {
+                        throw new CustomExceptions.ResourceNotFoundException("Cuenta no encontrada");
+                    }
+                    Cuenta cuenta = cuentaOpt.get();
 
-        cuentaRepository.findById(cuentaId)
-                .map(cuenta -> {
-                    cuenta.setSaldo(cuenta.getSaldo() + cuentaRequest.getSaldo());
+                    double nuevoSaldo = inlineObject.getNuevoSaldo();
+                    cuenta.setSaldo(nuevoSaldo);
+
                     return cuentaRepository.save(cuenta);
-                })
-                .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("Cuenta no encontrada con ID: " + cuentaId));
+                }).orElseThrow(() -> new CustomExceptions.BadRequestException("No se pudo actualizar el saldo"));
     }
 
     @Override
-    public void withdrawFromAccount(Integer cuentaId, CuentaRequest cuentaRequest) {
-        Optional.of(cuentaRequest)
-                .filter(req -> req.getSaldo() > 0)
-                .orElseThrow(() -> new CustomExceptions.BadRequestException("El monto a retirar debe ser mayor a 0."));
-
-        cuentaRepository.findById(cuentaId)
-                .map(cuenta -> {
-                    if (cuenta.getTipoCuenta() == TipoCuentaEnum.AHORROS) {
-                        if (cuenta.getSaldo() - cuentaRequest.getSaldo() < 0) {
-                            throw new CustomExceptions.BadRequestException("Fondos insuficientes. Las cuentas de ahorro no pueden tener saldo negativo.");
-                        }
-                    } else if (cuenta.getTipoCuenta() == TipoCuentaEnum.CORRIENTE) {
-                        if (cuenta.getSaldo() - cuentaRequest.getSaldo() < -500) {
-                            throw new CustomExceptions.BadRequestException("Fondos insuficientes. Las cuentas corrientes pueden tener un sobregiro máximo de -500.");
-                        }
-                    }
-
-                    cuenta.setSaldo(cuenta.getSaldo() - cuentaRequest.getSaldo());
-                    return cuentaRepository.save(cuenta);
-                })
-                .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("Cuenta no encontrada con ID: " + cuentaId));
+    public SaldoTipoResponse getAccountBalanceAndType(String numeroCuenta) {
+        return cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .map(cuentaMapper::getSaldoOfCuenta)
+                .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("Cuenta no encontrada"));
     }
 
 

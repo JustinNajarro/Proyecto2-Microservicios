@@ -3,6 +3,8 @@ package com.nttdata.AccountMs.business;
 
 import com.nttdata.AccountMs.model.CuentaRequest;
 import com.nttdata.AccountMs.model.CuentaResponse;
+import com.nttdata.AccountMs.model.InlineObject;
+import com.nttdata.AccountMs.model.SaldoTipoResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -12,6 +14,6 @@ public interface CuentaService {
     CuentaResponse createAccount(CuentaRequest cuentaRequest);
     CuentaResponse getAccountById(Integer id);
     void deleteAccountById(Integer id);
-    void depositToAccount(Integer cuentaId, CuentaRequest cuentaRequest);
-    void withdrawFromAccount(Integer cuentaId, CuentaRequest cuentaRequest);
+    void updateAccountBalance(String numeroCuenta, InlineObject inlineObject);
+    SaldoTipoResponse getAccountBalanceAndType(String numeroCuenta);
 }

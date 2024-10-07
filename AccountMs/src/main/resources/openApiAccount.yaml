@@ -119,27 +119,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /cuentas/{cuentaId}/depositar:
-    put:
-      summary: Realizar un depósito en una cuenta bancaria
-      operationId: depositToAccount
+  /cuentas/numero/{numeroCuenta}/saldo-tipo:
+    get:
+      summary: Obtener el saldo y tipo de cuenta por número de cuenta
+      operationId: getAccountBalanceAndType
       tags:
         - Cuentas
       parameters:
-        - name: cuentaId
+        - name: numeroCuenta
           in: path
           required: true
           schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CuentaRequest'
+            type: string
       responses:
         '200':
-          description: Depósito realizado exitosamente
+          description: Detalles del saldo y tipo de cuenta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaldoTipoResponse'
         '404':
           description: Cuenta no encontrada
           content:
@@ -153,33 +151,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /cuentas/{cuentaId}/retirar:
+  /cuentas/numero/{numeroCuenta}/actualizar-saldo:
     put:
-      summary: Realizar un retiro de una cuenta bancaria
-      operationId: withdrawFromAccount
+      summary: Actualizar el saldo de la cuenta bancaria
+      operationId: updateAccountBalance
       tags:
         - Cuentas
       parameters:
-        - name: cuentaId
+        - name: numeroCuenta
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CuentaRequest'
+              type: object
+              properties:
+                nuevoSaldo:
+                  type: number
+                  format: double
+                  description: Nuevo saldo de la cuenta
+              required:
+                - nuevoSaldo
       responses:
         '200':
-          description: Retiro realizado exitosamente
-        '400':
-          description: Retiro inválido (fondos insuficientes)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          description: Saldo actualizado exitosamente
         '404':
           description: Cuenta no encontrada
           content:
@@ -240,6 +239,21 @@ components:
         - saldo
         - tipoCuenta
         - clienteId
+
+    SaldoTipoResponse:
+      type: object
+      properties:
+        saldo:
+          type: number
+          format: double
+        tipoCuenta:
+          type: string
+          enum:
+            - AHORROS
+            - CORRIENTE
+      required:
+        - saldo
+        - tipoCuenta
 
     ErrorResponse:
       type: object
